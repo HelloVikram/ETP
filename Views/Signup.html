@@ -174,26 +174,31 @@
       const email=e.target.emailid.value;
       const password=e.target.password.value;
       const obj={email,password};
-      async function login() {
-        try{
-          const response=await axios.post("http://localhost:3000/user/login",obj);
-          console.log("login data posted successfully...",response.data);
-        }catch(err){
-          if(err.status!=200){
-        displayErrorMessage('Either email or password is not correct');
-        function displayErrorMessage(message) {
+      
+      function displayErrorMessage(message) {
         const errorDiv = document.getElementById('error-message');
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
-        }
-          
-
-        } 
-        console.log("Error in posting login data...",err);      
       }
-    }
-    })
 
+      async function loginfun() {
+        try{
+          const response=await axios.post("http://localhost:3000/user/login",obj);
+          if(response.status==200)
+          alert('Login successfull');
+          
+        }catch(err){
+          if(err.response){
+            if(err.response.status==401)
+          displayErrorMessage('User not authorized');
+        else if(err.response.status==404)
+        displayErrorMessage('User not found');
+        }
+        }    
+      }
+      loginfun();
+    })
+  
   </script>
 </body>
 </html>
