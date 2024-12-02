@@ -16,6 +16,16 @@
     <div class="container">
       
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item me-3">
+          <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#loginmodal"
+          >
+            Login
+          </button>
+        </li>
+        
         <li class="nav-item">
           <button
             class="btn btn-primary"
@@ -28,6 +38,51 @@
       </ul>
     </div>
   </nav>
+
+  <div class="contianer">
+    <div class="modal fade" id="loginmodal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Login</h2>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="loginformid">
+              <label for="emialid" class="form-label">Email</label>
+              <input
+                type="email"
+                id="emailid"
+                name="emailid"
+                class="form-control"
+                required
+              />
+              <label for="password" class="form-label">password</label>
+              <input
+                type="password"
+                class="form-control mb-3"
+                id="password"
+                name="password"
+                required
+              />
+              <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <div id="error-message" style="color: red; display: none;"></div>
+            <p>new user!</p>
+            <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#signupmodal"
+          >
+            Sign up
+          </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   <div class="modal fade" id="signupmodal">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
@@ -65,6 +120,7 @@
           </form>
         </div>
         <div class="modal-footer">
+          <div id="error-message" style="color: red; display: none;"></div>
           <button class="btn btn-primary" data-bs-dismiss="modal">
             close
           </button>
@@ -72,7 +128,6 @@
       </div>
     </div>
   </div>
-  <div id="error-message" style="color: red; display: none;"></div>
 </div>
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -111,6 +166,34 @@
       }
       postdata();
     })
+
+    const login=document.querySelector("#loginformid");
+    login.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      
+      const email=e.target.emailid.value;
+      const password=e.target.password.value;
+      const obj={email,password};
+      async function login() {
+        try{
+          const response=await axios.post("http://localhost:3000/user/login",obj);
+          console.log("login data posted successfully...",response.data);
+        }catch(err){
+          if(err.status!=200){
+        displayErrorMessage('Either email or password is not correct');
+        function displayErrorMessage(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        }
+          
+
+        } 
+        console.log("Error in posting login data...",err);      
+      }
+    }
+    })
+
   </script>
 </body>
 </html>
