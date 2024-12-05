@@ -56,7 +56,17 @@
    
     async function getexpense() {
         try{
-           const response=await axios.get("http://localhost:3000/expense/get-expense");
+            const token=localStorage.getItem('token');
+            if(!token){
+                alert('You need to login first!')
+                return
+            }
+
+           const response=await axios.get("http://localhost:3000/expense/get-expense",{
+            headers:{
+            Authorization:`Bearer ${token}`
+            }
+           });
            const ul=document.querySelector("#list");
            ul.innerHTML="";
 
@@ -70,7 +80,17 @@
     getexpense();
     async function postexpense(obj) {
         try{
-            const response=await axios.post("http://localhost:3000/expense/add-expense",obj);
+            const token=localStorage.getItem('token');
+            if(!token){
+                alert('You need to login first!')
+                return
+            }
+
+            const response=await axios.post("http://localhost:3000/expense/add-expense",obj,{
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            });
                 console.log("Expense posted successfully",response)
                 showItems(response.data)
         }catch(err){
@@ -79,8 +99,19 @@
                 
     }
     async function deleteexpense(obj){
+        const token=localStorage.getItem('token');
+        if(!token){
+            alert('you need to login first');
+            return;
+        }
+        
+
         try{
-            const response=await axios.delete(`http://localhost:3000/expense/delete-expense/${obj.id}`);
+            const response=await axios.delete(`http://localhost:3000/expense/delete-expense/${obj.id}`,{
+                headers:{
+                    Authorization:`Bearer ${token}` 
+                }
+            });
             console.log("data deleted successfully",response.data);
             getexpense();
         }catch(err){
