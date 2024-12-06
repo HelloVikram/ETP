@@ -10,9 +10,78 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+    }
+  
+    .container {
+      margin-top: 20px;
+      max-width: 800px;
+    }
+  
+    #backButton {
+      font-size: 16px;
+      font-weight: bold;
+    }
+  
+    h1 {
+      text-align: center;
+      color: #343a40;
+      margin-bottom: 20px;
+    }
+  
+    form {
+      background-color: #ffffff;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  
+    form label {
+      font-weight: bold;
+    }
+  
+    form .form-control {
+      margin-bottom: 15px;
+    }
+  
+    ul#list {
+      list-style: none;
+      padding: 0;
+    }
+  
+    ul#list li {
+      padding: 10px;
+      margin: 5px 0;
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  
+    ul#list button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  
+    ul#list button:hover {
+      background-color: #c82333;
+    }
+  </style>
 </head>
 <body>
     <div class="container-fluid">
+        <button class="btn btn-secondary m-3" id="backButton">← Back to Home</button>
         <div class="row">
             <div class="col d-flex justify-content-center">
              <form id="expenseform">
@@ -53,7 +122,9 @@
   referrerpolicy="no-referrer"
   ></script>
   <script>
-   
+    document.getElementById('backButton').addEventListener('click', () => {
+      window.location.href = 'index.html'; 
+    });
     async function getexpense() {
         try{
             const token=localStorage.getItem('token');
