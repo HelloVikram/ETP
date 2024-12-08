@@ -1,5 +1,6 @@
 const Sequelize=require('sequelize');
 const sequelize=require('../util/database');
+const { toDefaultValue } = require('sequelize/lib/utils');
 
 
 const user=sequelize.define('users',{
@@ -21,6 +22,10 @@ const user=sequelize.define('users',{
  password:{
     type:Sequelize.STRING,
     allowNull:false
- }
+ },
+ isPremium:{
+   type: Sequelize.BOOLEAN,
+   defaultValue:false
+}
 });
 module.exports=user;

@@ -49,4 +49,18 @@ const addExpense=async (req, res, next) => {
     }
  }
 
- module.exports={addExpense,getExpense,deleteExpense};
+const ispremium=async (req,res)=>{
+  try{
+   if(req.user){
+      console.log(req.user.isPremium);
+      res.status(200).json({ispremium:req.user.isPremium});
+   }else {
+      res.status(400).json({ success: false, message: 'User not found' });
+  }
+     
+  }catch(err){
+   res.status(500).json({success:false,message:'Error in finding premium user!'})
+  }
+}
+
+ module.exports={addExpense,getExpense,deleteExpense,ispremium};
