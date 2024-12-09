@@ -1,25 +1,19 @@
 const user=require('../Model/signup');
-const expense=require('../Model/expense');
+const expenses=require('../Model/expense');
 const Sequelize = require('sequelize');
-
+const sequelize=require('../util/database');
 const leaderboard=async(req,res)=>{
     try{
-       const result=[];
-       const User= await user.findAll();
-       const exp=await expense.findAll();
-      
-        User.forEach(async (element) => {
-          
-          let total=0;
-           exp.forEach(el=>{
-             if(element.id==el.userId)
-              total+=el.amount;
-          })
-          result.push({"name":element.name,"total":total});
+       const aggregate= await user.findAll({
+         attributes:['id','name',[sequelize.fn('sum',sequelize.col('expenses.amount')),'total']],
+         include:[{
+            model:expenses,
+            attributes:[]
+         }],
+         group:['users.id'],
+         order:[['total','desc']]
        });
-       result.sort((a,b)=>b.total-a.total);
-       console.log(result);
-       res.status(200).json({result});
+       res.status(200).json(aggregate);
     }catch(err){
        console.log("Error in fatchig leaderboard",err);
     }

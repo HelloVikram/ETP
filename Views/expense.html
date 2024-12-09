@@ -335,6 +335,12 @@
       async function showleaderboard() {
         const token = localStorage.getItem("token");
         try {
+          const premiumid=document.getElementById('premiumid');
+          premiumid.innerHTML=""
+          const inputelement=document.createElement('button');
+          inputelement.textContent='Leaderboard';
+          inputelement.classList.add('btn','btn-success')
+          premiumid.appendChild(inputelement);
           const response = await axios.get(
             "http://localhost:3000/premium/leaderboard",
             {
@@ -343,16 +349,9 @@
               },
             }
           );
-          console.log(response);
-          const premiumid=document.getElementById('premiumid');
-          premiumid.innerHTML=""
-          const inputelement=document.createElement('button');
-          inputelement.textContent='Leaderboard';
-          inputelement.classList.add('btn','btn-success')
-          premiumid.appendChild(inputelement);
           inputelement.addEventListener('click',(e)=>{
             e.preventDefault();
-            response.data.result.forEach(el=>{
+            response.data.forEach(el=>{
             const li=document.createElement('li');
             li.textContent=`Name:${el.name}-TotalExpense:${el.total}`
             premiumid.appendChild(li);
