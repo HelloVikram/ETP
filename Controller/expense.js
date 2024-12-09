@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const expensedb = require('../Model/expense');
+const user=require('../Model/signup');
 
 const addExpense=async (req, res, next) => {
     const { amount, description, category } = req.body;
@@ -62,5 +63,7 @@ const ispremium=async (req,res)=>{
    res.status(500).json({success:false,message:'Error in finding premium user!'})
   }
 }
+
+
 
  module.exports={addExpense,getExpense,deleteExpense,ispremium};

@@ -3,6 +3,7 @@ const app=express();
 const userroutes=require('./routes/user');
 const expenseroutes=require('./routes/expense');
 const purchaseroutes=require('./routes/purchase');
+const premiumroutes=require('./routes/premium');
 
 const cors=require('cors');
 app.use(cors());
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(userroutes);
 app.use(expenseroutes);
 app.use(purchaseroutes);
+app.use(premiumroutes);
 
 const user=require('./Model/signup');
 const expense=require('./Model/expense');
