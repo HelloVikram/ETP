@@ -351,7 +351,7 @@
               },
             }
           );
-          inputelement.addEventListener('click',(e)=>{
+           Button.addEventListener('click',(e)=>{
             e.preventDefault();
             console.log(response);
             response.data.forEach(el=>{
@@ -362,7 +362,7 @@
           })
           
         } catch (err) {
-          console.log("Error in fetching leaderboard data!");
+          console.log("Error in fetching leaderboard data!",err);
         }
       }
       getexpense();

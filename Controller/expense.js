@@ -1,31 +1,31 @@
 const Sequelize = require('sequelize');
 const expensedb = require('../Model/expense');
 const user=require('../Model/signup');
+const sequelize=require('../util/database');
 
 const addExpense=async (req, res, next) => {
     const { amount, description, category } = req.body;
     const userId = req.user.id;
+    const t=await sequelize.transaction();
     try {
        const response = await expensedb.create({ 
            amount: amount,
            description: description, 
            category: category,
            userId:userId
-           });
-           try{
-            const User= await user.findOne({where:{id:userId}})
-           if(User)
-               await User.update({totalExpense:User.totalExpense+Number(amount)});
-           }catch(err){
-           console.log("Error in finding user while adding expense!")
-           return
-           }
+           },{transaction:t});
+           
+           const User= await user.findOne({where:{id:userId}})
+           if(!User)
+            throw new Error('User not found')
+            await User.update({totalExpense:Number(User.totalExpense)+Number(amount)},{transaction:t});
        console.log("Expense db created successfully");
-       res.status(201).json(response);
+       await t.commit();
+       return res.status(201).json({ success: true, message: 'Expense added successfully', response });
     } catch (err) {
-       res.status(500).json({ Error: 'Error in creating Expensedb' })
+      await t.rollback();
+      return res.status(500).json({ success: false, message: 'Error adding expense', error: err.message });
     }
- 
  }
 
  const getExpense=async (req, res) => {
@@ -45,25 +45,27 @@ const addExpense=async (req, res, next) => {
  const deleteExpense= async (req, res) => {
     const eid = req.params.id;
     if (isNaN(eid)) {
-       return res.status(400).json({ error: 'Invalid expense ID' });
+       return res.status(400).json({success:false, message: 'Invalid expense ID' });
     }
- 
+    const t=await sequelize.transaction();
     try {
-      const expense=await expensedb.findOne({where:{id:eid,userId:req.user.id}}) ;
+      const expense=await expensedb.findOne({where:{id:eid,userId:req.user.id},transaction:t}) ;
       if(!expense){
-         return  res.status(404).json({ error: 'Expense not found or unauthorized'});
+         throw new Error('Expense not available or not authorized')
        }
        const amount=expense.amount;
-       const response = await expensedb.destroy({ where: { id: eid, userId:req.user.id } });
+       await expensedb.destroy({ where: { id: eid, userId:req.user.id },transaction:t });
        console.log(`Expense with ID ${eid} deleted successfully`);
-       const User = await user.findOne({ where: { id: req.user.id } }); 
-        if (User) {
-            await User.update({ totalExpense: User.totalExpense - amount });
-        }
-       res.status(200).json({ message: `Expense with ID ${eid} deleted successfully` });
+       const User = await user.findOne({ where: { id: req.user.id },transaction:t}); 
+       if(!User)
+         throw new Error("User not found!") ;
+         await User.update({ totalExpense: Number(User.totalExpense) - Number(amount) },{transaction:t});
+         res.status(200).json({  success:true, message: `Expense with ID ${eid} deleted successfully` });
+       await t.commit();
     } catch (err) {
-       console.error('Error deleting expense:', err);
-       res.status(500).json({ error: 'Error deleting expense' });
+       console.error('Error deleting expense:', err.message);
+       t.rollback();
+       res.status(500).json({ success:false, message: 'Error deleting expense' });
     }
  }
 
