@@ -149,6 +149,7 @@
       document.getElementById("backButton").addEventListener("click", () => {
         window.location.href = "index.html";
       });
+      
       async function getexpense() {
         try {
           const token = localStorage.getItem("token");
@@ -309,7 +310,7 @@
           alert("Something went wrong");
         }
       };
-      getexpense();
+      
 
       document.addEventListener("DOMContentLoaded", async (e) => {
         e.preventDefault();
@@ -327,6 +328,7 @@
             const premiumbutton = document.getElementById("premiumbutton");
             premiumbutton.textContent = "you are a premium User";
             premiumbutton.disabled = true;
+            showleaderboard();
           }
         } catch (err) {
           console.log("Error in fetching premium user", err);
@@ -337,10 +339,10 @@
         try {
           const premiumid=document.getElementById('premiumid');
           premiumid.innerHTML=""
-          const inputelement=document.createElement('button');
-          inputelement.textContent='Leaderboard';
-          inputelement.classList.add('btn','btn-success')
-          premiumid.appendChild(inputelement);
+          const Button=document.createElement('button');
+          Button.textContent='Leaderboard';
+          Button.classList.add('btn','btn-success')
+          premiumid.appendChild(Button);
           const response = await axios.get(
             "http://localhost:3000/premium/leaderboard",
             {
@@ -351,9 +353,10 @@
           );
           inputelement.addEventListener('click',(e)=>{
             e.preventDefault();
+            console.log(response);
             response.data.forEach(el=>{
             const li=document.createElement('li');
-            li.textContent=`Name:${el.name}-TotalExpense:${el.total}`
+            li.textContent=`Name:${el.name}-TotalExpense:${el.totalExpense}`
             premiumid.appendChild(li);
           })
           })
@@ -362,7 +365,7 @@
           console.log("Error in fetching leaderboard data!");
         }
       }
-      showleaderboard();
+      getexpense();
     </script>
   </body>
 </html>

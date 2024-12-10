@@ -12,6 +12,14 @@ const addExpense=async (req, res, next) => {
            category: category,
            userId:userId
            });
+           try{
+            const User= await user.findOne({where:{id:userId}})
+           if(User)
+               await User.update({totalExpense:User.totalExpense+Number(amount)});
+           }catch(err){
+           console.log("Error in finding user while adding expense!")
+           return
+           }
        console.log("Expense db created successfully");
        res.status(201).json(response);
     } catch (err) {
@@ -41,8 +49,17 @@ const addExpense=async (req, res, next) => {
     }
  
     try {
+      const expense=await expensedb.findOne({where:{id:eid,userId:req.user.id}}) ;
+      if(!expense){
+         return  res.status(404).json({ error: 'Expense not found or unauthorized'});
+       }
+       const amount=expense.amount;
        const response = await expensedb.destroy({ where: { id: eid, userId:req.user.id } });
        console.log(`Expense with ID ${eid} deleted successfully`);
+       const User = await user.findOne({ where: { id: req.user.id } }); 
+        if (User) {
+            await User.update({ totalExpense: User.totalExpense - amount });
+        }
        res.status(200).json({ message: `Expense with ID ${eid} deleted successfully` });
     } catch (err) {
        console.error('Error deleting expense:', err);
