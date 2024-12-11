@@ -143,7 +143,14 @@
               </form>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-primary"  type="button" data-bs-toggle="modal" data-bs-target="#forgetpasswordmodal" >Forget Password</button>
+              <button
+                class="btn btn-primary"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#forgetpasswordmodal"
+              >
+                Forget Password
+              </button>
               <div id="error-message" style="color: red; display: none"></div>
               <h6>New user!</h6>
               <button
@@ -207,18 +214,26 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h3>Forget password</h3>
+              <h3 class="modal-title">Forgot password</h3>
             </div>
             <div class="modal-body">
-              <form id="forgetpasswordform">
+              <form id="forgetpasswordform" method="post">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-control"
+                  placeholder="Enter your email"
+                />
                 <button type="submit" class="btn btn-primary">submit</button>
               </form>
             </div>
-           <div class="modal-footer">
-            <button class="btn btn-primary" data-bs-dismiss="modal">close</button>
-           </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-bs-dismiss="modal">
+                close
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -302,17 +317,27 @@
           }
         }
         loginfun();
-        const forgetbtn=document.getElementById('forgetpasswordform');
-        forgetbtn.onsubmit=async (e)=>{
-         e.preventDefault();
-         const email=e.target.email.value;
-         try{
-            const result=await axios.post('http://localhost:3000/password/forgotpassword',{email});
-         }catch(err){
-          console.log("error in forgetbuton ",err)
-         }
-       }
       });
+        const forgetbtn = document.getElementById("forgetpasswordform");
+        forgetbtn.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = e.target.email.value.trim();
+          if (!email) {
+            console.log("Email is required");
+            alert("Please enter a valid email address.");
+            return;
+          }
+          try {
+            const result = await axios.post(
+              "http://localhost:3000/password/forgotpassword",
+              { email }
+            );
+            console.log(result.data.message);
+          } catch (err) {
+            console.log("error in forgetbuton ", err);
+          }
+        });
+      
     </script>
   </body>
 </html>

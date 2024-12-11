@@ -4,6 +4,7 @@ const userroutes=require('./routes/user');
 const expenseroutes=require('./routes/expense');
 const purchaseroutes=require('./routes/purchase');
 const premiumroutes=require('./routes/premium');
+const passwordroutes=require('./routes/forgetpassword');
 
 const cors=require('cors');
 app.use(cors());
@@ -17,6 +18,7 @@ app.use(userroutes);
 app.use(expenseroutes);
 app.use(purchaseroutes);
 app.use(premiumroutes);
+app.use(passwordroutes);
 
 const user=require('./Model/signup');
 const expense=require('./Model/expense');
