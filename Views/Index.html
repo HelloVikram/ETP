@@ -143,8 +143,9 @@
               </form>
             </div>
             <div class="modal-footer">
+              <button class="btn btn-primary"  type="button" data-bs-toggle="modal" data-bs-target="#forgetpasswordmodal" >Forget Password</button>
               <div id="error-message" style="color: red; display: none"></div>
-              <p>new user!</p>
+              <h6>New user!</h6>
               <button
                 class="btn btn-primary"
                 data-bs-toggle="modal"
@@ -202,8 +203,26 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="forgetpasswordmodal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Forget password</h3>
+            </div>
+            <div class="modal-body">
+              <form id="forgetpasswordform">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email">
+                <button type="submit" class="btn btn-primary">submit</button>
+              </form>
+            </div>
+           <div class="modal-footer">
+            <button class="btn btn-primary" data-bs-dismiss="modal">close</button>
+           </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="container"></div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -283,6 +302,16 @@
           }
         }
         loginfun();
+        const forgetbtn=document.getElementById('forgetpasswordform');
+        forgetbtn.onsubmit=async (e)=>{
+         e.preventDefault();
+         const email=e.target.email.value;
+         try{
+            const result=await axios.post('http://localhost:3000/password/forgotpassword',{email});
+         }catch(err){
+          console.log("error in forgetbuton ",err)
+         }
+       }
       });
     </script>
   </body>
