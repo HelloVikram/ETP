@@ -24,7 +24,7 @@ const addExpense=async (req, res, next) => {
        return res.status(201).json({ success: true, message: 'Expense added successfully', response });
     } catch (err) {
       await t.rollback();
-      return res.status(500).json({ success: false, message: 'Error adding expense', error: err.message });
+      return res.status(500).json({ success: false, message: 'Error adding expense', error:err.message });
     }
  }
 

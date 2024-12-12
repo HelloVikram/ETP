@@ -4,4 +4,8 @@ const passwordcontroller=require('../Controller/password');
 
 router.post('/password/forgotpassword',passwordcontroller.fogotpassword);
 
+router.get('/password/resetpassword/:id',passwordcontroller.resetpassword);
+
+router.get('/password/updatepassword/:id',passwordcontroller.updatepassword);
+
 module.exports=router;
