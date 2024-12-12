@@ -127,9 +127,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <ul id="premiumid">
-
-          </ul>
+          <ul id="premiumid"></ul>
         </div>
       </div>
     </div>
@@ -149,7 +147,7 @@
       document.getElementById("backButton").addEventListener("click", () => {
         window.location.href = "index.html";
       });
-      
+
       async function getexpense() {
         try {
           const token = localStorage.getItem("token");
@@ -309,7 +307,6 @@
           alert("Something went wrong");
         }
       };
-      
 
       document.addEventListener("DOMContentLoaded", async (e) => {
         e.preventDefault();
@@ -328,6 +325,13 @@
             premiumbutton.textContent = "you are a premium User";
             premiumbutton.disabled = true;
             showleaderboard();
+            const downloadButton = document.createElement("button");
+            downloadButton.textContent = "Download Expenses";
+            downloadButton.classList.add("btn", "btn-info", "m-3");
+            downloadButton.addEventListener("click", download);
+
+            const premiumSection = document.getElementById("premiumid");
+            premiumSection.appendChild(downloadButton);
           }
         } catch (err) {
           console.log("Error in fetching premium user", err);
@@ -336,11 +340,11 @@
       async function showleaderboard() {
         const token = localStorage.getItem("token");
         try {
-          const premiumid=document.getElementById('premiumid');
-          premiumid.innerHTML=""
-          const Button=document.createElement('button');
-          Button.textContent='Leaderboard';
-          Button.classList.add('btn','btn-success')
+          const premiumid = document.getElementById("premiumid");
+          premiumid.innerHTML = "";
+          const Button = document.createElement("button");
+          Button.textContent = "Leaderboard";
+          Button.classList.add("btn", "btn-success");
           premiumid.appendChild(Button);
           const response = await axios.get(
             "http://localhost:3000/premium/leaderboard",
@@ -350,18 +354,43 @@
               },
             }
           );
-           Button.addEventListener('click',(e)=>{
+          Button.addEventListener("click", (e) => {
             e.preventDefault();
             console.log(response);
-            response.data.forEach(el=>{
-            const li=document.createElement('li');
-            li.textContent=`Name:${el.name}-TotalExpense:${el.totalExpense}`
-            premiumid.appendChild(li);
-          })
-          })
-          
+            response.data.forEach((el) => {
+              const li = document.createElement("li");
+              li.textContent = `Name:${el.name}-TotalExpense:${el.totalExpense}`;
+              premiumid.appendChild(li);
+            });
+          });
         } catch (err) {
-          console.log("Error in fetching leaderboard data!",err);
+          console.log("Error in fetching leaderboard data!", err);
+        }
+      }
+
+      async function download() {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            "http://localhost:3000/expense/download",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (
+            response.status == 201 &&
+            response.data &&
+            response.data.fileUrl
+          ) {
+            const a = document.createElement("a");
+            a.href = response.data.fileUrl;
+            a.download = "expense.csv";
+            a.click();
+            alert("Data will be downloded");
+          }
+        } catch (err) {
+          alert("Failed to fetch expenses. Please try again.");
+          console.log("Error in downloading ", err);
         }
       }
       getexpense();

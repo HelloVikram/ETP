@@ -267,6 +267,17 @@
             console.log("data posted successfully...");
             console.log(result.data);
             e.target.reset();
+            const signupModalElement = document.getElementById("signupModal");
+            const signupModal = bootstrap.Modal.getInstance(signupModalElement);
+
+            if (signupModal) {
+              signupModal.hide();
+            }
+
+            const loginModal = new bootstrap.Modal(
+              document.getElementById("loginmodal")
+            );
+            loginModal.show();
           } catch (err) {
             if (err.response.status == 409) {
               displayErrorMessage("User already exists");
@@ -318,26 +329,25 @@
         }
         loginfun();
       });
-        const forgetbtn = document.getElementById("forgetpasswordform");
-        forgetbtn.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = e.target.email.value.trim();
-          if (!email) {
-            console.log("Email is required");
-            alert("Please enter a valid email address.");
-            return;
-          }
-          try {
-            const result = await axios.post(
-              "http://localhost:3000/password/forgotpassword",
-              { email }
-            );
-            console.log(result.data.message);
-          } catch (err) {
-            console.log("error in forgetbuton ", err);
-          }
-        });
-      
+      const forgetbtn = document.getElementById("forgetpasswordform");
+      forgetbtn.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value.trim();
+        if (!email) {
+          console.log("Email is required");
+          alert("Please enter a valid email address.");
+          return;
+        }
+        try {
+          const result = await axios.post(
+            "http://localhost:3000/password/forgotpassword",
+            { email }
+          );
+          console.log(result.data.message);
+        } catch (err) {
+          console.log("error in forgetbuton ", err);
+        }
+      });
     </script>
   </body>
 </html>
