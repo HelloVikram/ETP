@@ -27,6 +27,7 @@ const user=require('./Model/signup');
 const expense=require('./Model/expense');
 const orders=require('./Model/orders');
 const ForgotPasswordRequests=require('./Model/forgetpassword');
+const savedurls=require('./Model/savedurl');
 
 user.hasMany(expense);
 expense.belongsTo(user);
@@ -36,6 +37,9 @@ orders.belongsTo(user);
 
 user.hasMany(ForgotPasswordRequests);
 ForgotPasswordRequests.belongsTo(user);
+
+user.hasMany(savedurls);
+savedurls.belongsTo(user);
 
 db.sync().then((res)=>{
     app.listen(3000);

@@ -2,6 +2,8 @@ const Sequelize = require('sequelize');
 const expensedb = require('../Model/expense');
 const user=require('../Model/signup');
 const sequelize=require('../util/database');
+const AWSService=require('../services/awsServices');
+const savedUrl=require('../Model/savedurl');
 
 const addExpense=async (req, res, next) => {
     const { amount, description, category } = req.body;
@@ -83,6 +85,28 @@ const ispremium=async (req,res)=>{
   }
 }
 
-
-
- module.exports={addExpense,getExpense,deleteExpense,ispremium};
+const downloadexpenses = async (req, res) => {
+   try {
+     const userId = req.user.id;
+     const expenses = await expensedb.findAll({ where: { userId } });
+     const stringifiedExpenses = JSON.stringify(expenses); 
+     const filename = `${userId}/${Date.now()}/expenses.txt`;
+     const bucketName=process.env.bucket;
+     console.log(stringifiedExpenses)
+     const fileUrl = await AWSService.uploadToS3(bucketName, filename,stringifiedExpenses);
+     await savedUrl.create({userId:userId, url:fileUrl})
+     .catch((err)=>{
+      console.log(err);
+     })
+    const urls= await savedUrl.findAll({where:{userId}})
+     .catch((err)=>{
+      console.log(err);
+     })
+     res.status(201).json({ fileUrl,urls, success: true });
+   } catch (error) {
+     console.error('Error downloading expenses:', error);
+     res.status(500).json({ error: 'Failed to download expenses', success: false });
+   }
+ };
+ 
+module.exports={addExpense,getExpense,deleteExpense,ispremium,downloadexpenses};

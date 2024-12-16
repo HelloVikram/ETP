@@ -12,5 +12,7 @@ router.delete('/expense/delete-expense/:id',authenticate.authenticate,expensecon
 
 router.get('/expense/details',authenticate.authenticate,expensecontroller.ispremium);
 
+router.get('/expense/download',authenticate.authenticate,expensecontroller.downloadexpenses);
+
 
 module.exports=router;
