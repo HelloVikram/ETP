@@ -5,6 +5,11 @@ const expenseroutes=require('./routes/expense');
 const purchaseroutes=require('./routes/purchase');
 const premiumroutes=require('./routes/premium');
 const passwordroutes=require('./routes/forgetpassword');
+const helmet=require('helmet');
+const compression=require('compression');
+const morgan=require('morgan');
+const fs=require('fs');
+const path=require('path')
 const { v4: uuidv4 } = require('uuid');
 uuidv4();
 
@@ -13,6 +18,11 @@ app.use(cors());
 
 const db=require('./util/database');
 require('dotenv').config();
+const accesslogStream=fs.createWriteStream(path.join(__dirname,'access.log'),{flag:'a'});
+
+app.use(helmet());
+app.use(compression())
+app.use(morgan('combined',{stream:accesslogStream}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,7 +52,7 @@ user.hasMany(savedurls);
 savedurls.belongsTo(user);
 
 db.sync().then((res)=>{
-    app.listen(3000);
+    app.listen(process.env.host);
     console.log("database sync successfull...");
 })
 .catch(err=>console.log("Error in syncing database",err))
