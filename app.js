@@ -52,7 +52,7 @@ user.hasMany(savedurls);
 savedurls.belongsTo(user);
 
 db.sync().then((res)=>{
-    app.listen(process.env.host);
+    app.listen(process.env.port);
     console.log("database sync successfull...");
 })
 .catch(err=>console.log("Error in syncing database",err))
