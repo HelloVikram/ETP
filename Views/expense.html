@@ -123,7 +123,17 @@
       <div class="row">
         <div class="col">
           <ul id="list"></ul>
-          <div id="pagination" class="d-flex justify-content-center mt-3"></div
+          <div id="pagination" class="d-flex justify-content-center mt-3"></div>
+          <div class="d-flex justify-content-center mt-3">
+            <label for="Chooseone" class="form-label">Expenses Per Page</label>
+            <select class="form-select w-auto" id="Chooseone" name="Chooseone">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="row">
@@ -150,66 +160,64 @@
     ></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    document.getElementById("backButton").addEventListener("click", () => {
+      document.getElementById("backButton").addEventListener("click", () => {
         window.location.href = "index.html";
-    });
-      
-  let currentPage = 1;
-  const expensesPerPage = 5;
+      });
+          let expensesPerPage = 5;
+          let currentPage = 1;
+      async function getexpense(page = 1) {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            alert("You need to login first!");
+            return;
+          }
 
-  async function getexpense(page = 1) {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You need to login first!");
-        return;
+          const response = await axios.get(
+            `http://localhost:3000/expense/get-expense?page=${page}&limit=${expensesPerPage}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const ul = document.querySelector("#list");
+          ul.innerHTML = "";
+
+          response.data.data.forEach((element) => {
+            showItems(element);
+          });
+
+          updatePaginationControls(response.data.totalPages, page);
+        } catch (err) {
+          console.log("Error in getting Expense...", err);
+        }
       }
 
-      const response = await axios.get(
-        `http://localhost:3000/expense/get-expense?page=${page}&limit=${expensesPerPage}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      function updatePaginationControls(totalPages, currentPage) {
+        const paginationContainer = document.querySelector("#pagination");
 
-      const ul = document.querySelector("#list");
-      ul.innerHTML = "";
+        paginationContainer.innerHTML = "";
 
-      response.data.data.forEach((element) => {
-        showItems(element);
-      });
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Previous";
+        prevButton.disabled = currentPage <= 1;
+        prevButton.addEventListener("click", () => {
+          getexpense(currentPage - 1);
+        });
+        paginationContainer.appendChild(prevButton);
 
-      updatePaginationControls(response.data.totalPages, page);
-    } catch (err) {
-      console.log("Error in getting Expense...", err);
-    }
-  }
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Next";
+        nextButton.disabled = currentPage >= totalPages;
+        nextButton.addEventListener("click", () => {
+          getexpense(currentPage + 1);
+        });
+        paginationContainer.appendChild(nextButton);
+      }
 
-  function updatePaginationControls(totalPages, currentPage) {
-    const paginationContainer = document.querySelector("#pagination");
-
-    paginationContainer.innerHTML = "";
-
-    const prevButton = document.createElement("button");
-    prevButton.textContent = "Previous";
-    prevButton.disabled = currentPage <= 1;
-    prevButton.addEventListener("click", () => {
-      getexpense(currentPage - 1);
-    });
-    paginationContainer.appendChild(prevButton);
-
-    const nextButton = document.createElement("button");
-    nextButton.textContent = "Next";
-    nextButton.disabled = currentPage >= totalPages;
-    nextButton.addEventListener("click", () => {
-      getexpense(currentPage + 1);
-    });
-    paginationContainer.appendChild(nextButton);
-  }
-
-  async function postexpense(obj) {
+      async function postexpense(obj) {
         try {
           const token = localStorage.getItem("token");
           if (!token) {
@@ -232,7 +240,7 @@
           console.log("Error in posting expense", err);
         }
       }
-    async function deleteexpense(obj) {
+      async function deleteexpense(obj) {
         const token = localStorage.getItem("token");
         if (!token) {
           alert("you need to login first");
@@ -346,6 +354,13 @@
       document.addEventListener("DOMContentLoaded", async (e) => {
         e.preventDefault();
         getexpense(currentPage);
+        const expenses = document.getElementById("Chooseone");
+        expenses.addEventListener("change", (e) => {
+          e.preventDefault();
+          expensesPerPage = parseInt(e.target.value);
+          currentPage = 1;
+          getexpense(currentPage);
+        });
         const token = localStorage.getItem("token");
         try {
           const response = await axios.get(
@@ -414,29 +429,27 @@
             }
           );
           console.log(response);
-        
+
           if (
-            response.status == 201&&
+            response.status == 201 &&
             response.data &&
             response.data.fileUrl
-          ) 
-          {
+          ) {
             const a = document.createElement("a");
             a.href = `${response.data.fileUrl}`;
             a.download = "expenses.txt";
             a.click();
             alert("Data will be downloded");
           }
-          if(!response.data.urls){
-            console.log("something went wrong in fetching urls")
-          }
-          else{
-            const ul=document.getElementById('downloadid');
-            response.data.urls.forEach(el=>{
-              const li=document.createElement('li');
-              li.innerHTML=`<a href=${el.url}>${el.url}</a>`
+          if (!response.data.urls) {
+            console.log("something went wrong in fetching urls");
+          } else {
+            const ul = document.getElementById("downloadid");
+            response.data.urls.forEach((el) => {
+              const li = document.createElement("li");
+              li.innerHTML = `<a href=${el.url}>${el.url}</a>`;
               ul.appendChild(li);
-            })
+            });
           }
         } catch (err) {
           alert("Failed to fetch expenses. Please try again.");
