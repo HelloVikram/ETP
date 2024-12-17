@@ -29,20 +29,36 @@ const addExpense=async (req, res, next) => {
       return res.status(500).json({ success: false, message: 'Error adding expense', error:err.message });
     }
  }
-
- const getExpense=async (req, res) => {
-    const userId=req.user.id;
-    try {
-       const response = await expensedb.findAll({
-          where:{
-             userId:userId
-          }
-       });
-       res.status(200).json(response);
-    } catch (err) {
-       res.status(400).json({ message: 'Error in fetching data' });
-    }
- }
+const getExpense = async (req, res) => {
+   const userId = req.user.id;
+   const { page = 1, limit = 5 } = req.query; 
+   const offset = (page - 1) * limit;  
+ 
+   try {
+      const expenses = await expensedb.findAll({
+       where: { userId: userId },
+       limit: parseInt(limit),  
+       offset: parseInt(offset), 
+     });
+      const count = await expensedb.count({
+       where: { userId: userId }
+     });
+ 
+     
+     const totalPages = Math.ceil(count / limit);
+ 
+     
+     res.status(200).json({
+       data: expenses,         
+       totalPages: totalPages, 
+       currentPage: page       
+     });
+   } catch (err) {
+     console.log(err);
+     res.status(400).json({ message: 'Error in fetching data' });
+   }
+ };
+ 
 
  const deleteExpense= async (req, res) => {
     const eid = req.params.id;
