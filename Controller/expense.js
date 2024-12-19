@@ -1,128 +1,99 @@
-const Sequelize = require('sequelize');
-const expensedb = require('../Model/expense');
-const user=require('../Model/signup');
-const sequelize=require('../util/database');
-const AWSService=require('../services/awsServices');
-const savedUrl=require('../Model/savedurl');
+const expenseService = require('../services/expenseService');
+const sequelize = require('../util/database');
 
-const addExpense=async (req, res, next) => {
+const addExpense = async (req, res) => {
     const { amount, description, category } = req.body;
     const userId = req.user.id;
-    const t=await sequelize.transaction();
+
+    const t = await sequelize.transaction();
     try {
-       const response = await expensedb.create({ 
-           amount: amount,
-           description: description, 
-           category: category,
-           userId:userId
-           },{transaction:t});
-           
-           const User= await user.findOne({where:{id:userId}})
-           if(!User)
-            throw new Error('User not found')
-            await User.update({totalExpense:Number(User.totalExpense)+Number(amount)},{transaction:t});
-       console.log("Expense db created successfully");
-       await t.commit();
-       return res.status(201).json({ success: true, message: 'Expense added successfully', response });
+        const expense = await expenseService.createExpense(amount, description, category, userId, t);
+        const User = await expenseService.findUserById(userId, t);
+        if (!User) throw new Error('User not found');
+
+        const newTotalExpense = Number(User.totalExpense) + Number(amount);
+        await expenseService.updateUserExpense(User, newTotalExpense, t);
+
+        await t.commit();
+        res.status(201).json({ success: true, message: 'Expense added successfully', response: expense });
     } catch (err) {
-      await t.rollback();
-      return res.status(500).json({ success: false, message: 'Error adding expense', error:err.message });
+        await t.rollback();
+        res.status(500).json({ success: false, message: 'Error adding expense', error: err.message });
     }
- }
+};
+
 const getExpense = async (req, res) => {
-   const userId = req.user.id;
-   const { page = 1, limit = 5 } = req.query; 
-   const offset = (page - 1) * limit;  
- 
-   try {
-      const expenses = await expensedb.findAll({
-       where: { userId: userId },
-       limit: parseInt(limit),  
-       offset: parseInt(offset), 
-     });
-      const count = await expensedb.count({
-       where: { userId: userId }
-     });
- 
-     
-     const totalPages = Math.ceil(count / limit);
- 
-     
-     res.status(200).json({
-       data: expenses,         
-       totalPages: totalPages, 
-       currentPage: page       
-     });
-   } catch (err) {
-     console.log(err);
-     res.status(400).json({ message: 'Error in fetching data' });
-   }
- };
- 
+    const userId = req.user.id;
+    const page = parseInt(req.query.page || 1, 10);
+    const limit = parseInt(req.query.limit || 5, 10);
+    const offset = (page - 1) * limit;
 
- const deleteExpense= async (req, res) => {
-    const eid = req.params.id;
-    if (isNaN(eid)) {
-       return res.status(400).json({success:false, message: 'Invalid expense ID' });
-    }
-    const t=await sequelize.transaction();
     try {
-      const expense=await expensedb.findOne({where:{id:eid,userId:req.user.id},transaction:t}) ;
-      if(!expense){
-         throw new Error('Expense not available or not authorized')
-       }
-       const amount=expense.amount;
-       await expensedb.destroy({ where: { id: eid, userId:req.user.id },transaction:t });
-       console.log(`Expense with ID ${eid} deleted successfully`);
-       const User = await user.findOne({ where: { id: req.user.id },transaction:t}); 
-       if(!User)
-         throw new Error("User not found!") ;
-         await User.update({ totalExpense: Number(User.totalExpense) - Number(amount) },{transaction:t});
-         res.status(200).json({  success:true, message: `Expense with ID ${eid} deleted successfully` });
-       await t.commit();
-    } catch (err) {
-       console.error('Error deleting expense:', err.message);
-       t.rollback();
-       res.status(500).json({ success:false, message: 'Error deleting expense' });
-    }
- }
+        const expenses = await expenseService.findExpenses(userId, limit, offset);
+        const count = await expenseService.countExpenses(userId);
 
-const ispremium=async (req,res)=>{
-  try{
-   if(req.user){
-      console.log(req.user.isPremium);
-      res.status(200).json({ispremium:req.user.isPremium});
-   }else {
-      res.status(400).json({ success: false, message: 'User not found' });
-  }
-     
-  }catch(err){
-   res.status(500).json({success:false,message:'Error in finding premium user!'})
-  }
-}
+        res.status(200).json({
+            data: expenses,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+        });
+    } catch (err) {
+        res.status(400).json({ message: 'Error fetching expenses' });
+    }
+};
+
+const deleteExpense = async (req, res) => {
+    const eid = req.params.id;
+
+    const t = await sequelize.transaction();
+    try {
+        const expense = await expenseService.findExpenseById(eid, req.user.id, t);
+        if (!expense) throw new Error('Expense not found or unauthorized');
+
+        const User = await expenseService.findUserById(req.user.id, t);
+        const newTotalExpense = Number(User.totalExpense) - Number(expense.amount);
+
+        await expenseService.deleteExpenseById(eid, req.user.id, t);
+        await expenseService.updateUserExpense(User, newTotalExpense, t);
+
+        await t.commit();
+        res.status(200).json({ success: true, message: 'Expense deleted successfully' });
+    } catch (err) {
+        await t.rollback();
+        res.status(500).json({ success: false, message: 'Error deleting expense' });
+    }
+};
+
+const ispremium = async (req, res) => {
+    try {
+        res.status(200).json({ ispremium: req.user.isPremium });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Error checking premium status' });
+    }
+};
 
 const downloadexpenses = async (req, res) => {
-   try {
-     const userId = req.user.id;
-     const expenses = await expensedb.findAll({ where: { userId } });
-     const stringifiedExpenses = JSON.stringify(expenses); 
-     const filename = `${userId}/${Date.now()}/expenses.txt`;
-     const bucketName=process.env.bucket;
-     console.log(stringifiedExpenses)
-     const fileUrl = await AWSService.uploadToS3(bucketName, filename,stringifiedExpenses);
-     await savedUrl.create({userId:userId, url:fileUrl})
-     .catch((err)=>{
-      console.log(err);
-     })
-    const urls= await savedUrl.findAll({where:{userId}})
-     .catch((err)=>{
-      console.log(err);
-     })
-     res.status(201).json({ fileUrl,urls, success: true });
-   } catch (error) {
-     console.error('Error downloading expenses:', error);
-     res.status(500).json({ error: 'Failed to download expenses', success: false });
-   }
- };
- 
-module.exports={addExpense,getExpense,deleteExpense,ispremium,downloadexpenses};
+    try {
+        const userId = req.user.id;
+        const expenses = await expenseService.findExpenses(userId, null, null);
+        const stringifiedExpenses = JSON.stringify(expenses);
+        const filename = `${userId}/${Date.now()}/expenses.txt`;
+        const bucketName = process.env.bucket;
+
+        const fileUrl = await expenseService.uploadToS3(bucketName, filename, stringifiedExpenses);
+        await expenseService.saveUrl(userId, fileUrl);
+
+        const urls = await expenseService.getSavedUrls(userId);
+        res.status(201).json({ fileUrl, urls, success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Error downloading expenses', success: false });
+    }
+};
+
+module.exports = {
+    addExpense,
+    getExpense,
+    deleteExpense,
+    ispremium,
+    downloadexpenses,
+};
