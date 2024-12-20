@@ -41,7 +41,11 @@ app.get('/expense', (req, res) => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
-console.log('Checking jenkins');
+
+app.use((req,res)=>{
+    console.log('404 Error');
+})
+
 app.use(userroutes);
 app.use(expenseroutes);
 app.use(purchaseroutes);
