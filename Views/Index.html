@@ -73,7 +73,7 @@
         <a href="#" class="navbar-brand">Home</a>
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a href="expense.html" class="nav-link active">Daily Expense</a>
+            <a href="/expense" class="nav-link active">Daily Expense</a>
           </li>
         </ul>
         <ul class="navbar-nav ms-auto">
@@ -105,12 +105,9 @@
       <p class="lead">
         Manage your expenses efficiently and track your spending habits.
       </p>
-      <button
-        class="btn btn-primary btn-lg"
-        onclick="window.location.href='expense.html'"
-      >
+      <a href="/expense" class="btn btn-primary btn-lg">
         Start Tracking Expenses
-      </button>
+    </a>
     </div>
 
     <div class="contianer">
@@ -250,6 +247,7 @@
       referrerpolicy="no-referrer"
     ></script>
     <script>
+      const endpoint=`3.108.215.42`
       const signup = document.querySelector("#signupformid");
       signup.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -261,7 +259,7 @@
         async function postdata() {
           try {
             const result = await axios.post(
-              "http://localhost:3000/user/signup",
+              `${endpoint}/user/signup`,
               obj
             );
             console.log("data posted successfully...");
@@ -310,7 +308,7 @@
         async function loginfun() {
           try {
             const response = await axios.post(
-              "http://localhost:3000/user/login",
+              `${endpoint}/user/login`,
               obj
             );
             if (response.status == 200)
@@ -340,7 +338,7 @@
         }
         try {
           const result = await axios.post(
-            "http://localhost:3000/password/forgotpassword",
+            `${endpoint}/password/forgotpassword`,
             { email }
           );
           console.log(result.data.message);

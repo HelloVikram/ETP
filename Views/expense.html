@@ -160,6 +160,7 @@
     ></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+      const endpoint=`3.108.215.42`
       document.getElementById("backButton").addEventListener("click", () => {
         window.location.href = "index.html";
       });
@@ -174,7 +175,7 @@
           }
 
           const response = await axios.get(
-            `http://localhost:3000/expense/get-expense?page=${page}&limit=${expensesPerPage}`,
+            `${endpoint}/expense/get-expense?page=${page}&limit=${expensesPerPage}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -226,7 +227,7 @@
           }
 
           const result = await axios.post(
-            "http://localhost:3000/expense/add-expense",
+            `${endpoint}/expense/add-expense`,
             obj,
             {
               headers: {
@@ -249,7 +250,7 @@
 
         try {
           const response = await axios.delete(
-            `http://localhost:3000/expense/delete-expense/${obj.id}`,
+            `${endpoint}/expense/delete-expense/${obj.id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -296,7 +297,7 @@
         const token = localStorage.getItem("token");
         try {
           const response = await axios.get(
-            "http://localhost:3000/purchase/buypremium",
+            `${endpoint}/purchase/buypremium`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           console.log(response);
@@ -306,7 +307,7 @@
             handler: async function (response) {
               try {
                 await axios.post(
-                  "http://localhost:3000/purchase/updatepremiummembers",
+                  `${endpoint}/purchase/updatepremiummembers`,
                   {
                     order_id: options.order_id,
                     payment_id: response.razorpay_payment_id,
@@ -331,7 +332,7 @@
 
             try {
               const result = await axios.post(
-                "http://localhost:3000/purchase/updatepremiumuseronfailure",
+                `${endpoint}/purchase/updatepremiumuseronfailure`,
                 {
                   order_id: options.order_id,
                 },
@@ -364,7 +365,7 @@
         const token = localStorage.getItem("token");
         try {
           const response = await axios.get(
-            "http://localhost:3000/expense/details",
+            `${endpoint}/expense/details`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -398,7 +399,7 @@
           Button.classList.add("btn", "btn-success");
           premiumid.appendChild(Button);
           const response = await axios.get(
-            "http://localhost:3000/premium/leaderboard",
+            `${endpoint}/premium/leaderboard`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -423,7 +424,7 @@
         try {
           const token = localStorage.getItem("token");
           const response = await axios.get(
-            "http://localhost:3000/expense/download",
+            `${endpoint}/expense/download`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
