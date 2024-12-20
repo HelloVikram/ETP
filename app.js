@@ -45,7 +45,7 @@ app.get('*', (req, res) => {
 app.use((req,res)=>{
     console.log('404 Error');
 })
-
+console.log("hello jenkins")
 app.use(userroutes);
 app.use(expenseroutes);
 app.use(purchaseroutes);
