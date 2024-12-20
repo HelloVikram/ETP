@@ -34,14 +34,14 @@ app.use(morgan('combined',{stream:accesslogStream}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
-});
-
 app.get('/expense', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'expense.html'));
 });
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+console.log('Checking jenkins');
 app.use(userroutes);
 app.use(expenseroutes);
 app.use(purchaseroutes);
